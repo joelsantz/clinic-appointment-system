@@ -6,8 +6,8 @@ import {
   patients,
   resources,
   todayInLocalTime,
-} from "./appointment.js";
-import { loadAppointments, saveAppointment } from "./storage.js";
+} from "./appointment.js?v=2";
+import { loadAppointments, saveAppointment } from "./storage.js?v=2";
 
 const form = document.querySelector("#appointment-form");
 const scheduleView = document.querySelector("#schedule-view");
