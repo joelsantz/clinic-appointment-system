@@ -5,7 +5,9 @@ import {
   formatTime,
   patients,
   resources,
+  todayInLocalTime,
 } from "./appointment.js";
+import { loadAppointments, saveAppointment } from "./storage.js";
 
 const form = document.querySelector("#appointment-form");
 const scheduleView = document.querySelector("#schedule-view");
@@ -19,12 +21,8 @@ const scheduleAnotherButton = document.querySelector("#schedule-another");
 const submitButton = document.querySelector("#submit-button");
 
 let selectedTime = "";
-
-function todayInLocalTime() {
-  const now = new Date();
-  const offset = now.getTimezoneOffset() * 60_000;
-  return new Date(now.getTime() - offset).toISOString().slice(0, 10);
-}
+let appointments = loadAppointments();
+let lastAppointment = null;
 
 function formatDate(date) {
   return new Intl.DateTimeFormat("en-US", {
@@ -44,6 +42,8 @@ function setFieldError(field, message = "") {
 
 function clearErrors() {
   summaryError.hidden = true;
+  summaryError.querySelector("strong").textContent = "Unable to schedule appointment";
+  summaryError.querySelector("p").textContent = "Review the highlighted fields before confirming.";
   setFieldError("patient");
   setFieldError("appointment-date");
   setFieldError("time-slots");
@@ -57,7 +57,7 @@ function renderPatients() {
 }
 
 function renderSlots() {
-  slotsContainer.innerHTML = buildTimeSlots()
+  slotsContainer.innerHTML = buildTimeSlots({ date: dateInput.value, appointments })
     .map(({ time, status }) => {
       const unavailable = status !== "available";
       const statusLabel = status === "booked" ? "Booked" : status === "blocked" ? "Blocked" : "";
@@ -88,6 +88,7 @@ function selectTime(button) {
 }
 
 function renderConfirmation(appointment) {
+  lastAppointment = appointment;
   const rows = [
     ["Patient", appointment.patient.name],
     ["Date", formatDate(appointment.date)],
@@ -107,13 +108,12 @@ function renderConfirmation(appointment) {
 }
 
 function resetAppointment() {
+  const previousDate = lastAppointment?.date ?? "";
   form.reset();
+  dateInput.value = previousDate;
   selectedTime = "";
   clearErrors();
-  slotsContainer.querySelectorAll(".time-slot").forEach((slot) => {
-    slot.classList.remove("is-selected");
-    slot.setAttribute("aria-pressed", "false");
-  });
+  renderSlots();
   confirmationView.hidden = true;
   scheduleView.hidden = false;
   patientSelect.focus();
@@ -124,15 +124,25 @@ slotsContainer.addEventListener("click", (event) => {
   if (button) selectTime(button);
 });
 
+dateInput.addEventListener("change", () => {
+  selectedTime = "";
+  setFieldError("appointment-date");
+  setFieldError("time-slots");
+  renderSlots();
+});
+
 form.addEventListener("submit", (event) => {
   event.preventDefault();
   clearErrors();
 
-  const result = createAppointment({
-    patientId: patientSelect.value,
-    date: dateInput.value,
-    time: selectedTime,
-  });
+  const result = createAppointment(
+    {
+      patientId: patientSelect.value,
+      date: dateInput.value,
+      time: selectedTime,
+    },
+    { appointments },
+  );
 
   if (!result.ok) {
     summaryError.hidden = false;
@@ -145,6 +155,18 @@ form.addEventListener("submit", (event) => {
 
   submitButton.disabled = true;
   submitButton.textContent = "Booking…";
+  try {
+    appointments = saveAppointment(result.appointment);
+    renderSlots();
+  } catch {
+    summaryError.hidden = false;
+    summaryError.querySelector("strong").textContent = "Unable to save appointment";
+    summaryError.querySelector("p").textContent = "Browser storage is unavailable. Try again.";
+    submitButton.disabled = false;
+    submitButton.textContent = "Confirm Appointment";
+    return;
+  }
+
   window.setTimeout(() => {
     renderConfirmation(result.appointment);
     submitButton.disabled = false;

@@ -11,6 +11,9 @@ A responsive, dependency-free implementation of the Study.com Assignment 2 appoi
 - Single doctor and examination room availability
 - Required-field and double-booking validation
 - Booking confirmation with initial `Active` status
+- Browser-local persistence using a date-and-time reservation ID
+- Immediate slot refresh after a successful booking
+- Domain-level validation for dates, clinic hours, intervals, and duplicate reservations
 - Responsive and accessible interface
 - Automated unit tests and GitHub Pages deployment
 
@@ -25,7 +28,7 @@ Then open <http://localhost:4173>.
 
 ## Architecture
 
-The project intentionally uses plain HTML, CSS, and JavaScript. Business rules live in `src/appointment.js`, browser interactions in `src/app.js`, and tests in `tests/appointment.test.js`.
+The project intentionally uses plain HTML, CSS, and JavaScript. Business rules live in `src/appointment.js`, browser persistence in `src/storage.js`, browser interactions in `src/app.js`, and tests in `tests/appointment.test.js`.
 
 ## Deployment
 
