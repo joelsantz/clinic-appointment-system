@@ -1,0 +1,36 @@
+# Clinic Appointment Management System
+
+A responsive, dependency-free implementation of the Study.com Assignment 2 appointment scheduling prototype.
+
+## Features
+
+- Registered patient selection
+- Date selection
+- 30-minute appointments from 08:00 through 17:30
+- Booked and blocked time slots
+- Single doctor and examination room availability
+- Required-field and double-booking validation
+- Booking confirmation with initial `Active` status
+- Responsive and accessible interface
+- Automated unit tests and GitHub Pages deployment
+
+## Run locally
+
+```bash
+npm test
+npm run serve
+```
+
+Then open <http://localhost:4173>.
+
+## Architecture
+
+The project intentionally uses plain HTML, CSS, and JavaScript. Business rules live in `src/appointment.js`, browser interactions in `src/app.js`, and tests in `tests/appointment.test.js`.
+
+## Deployment
+
+Every push to `main` runs the test suite and deploys the repository to GitHub Pages using `.github/workflows/test-and-deploy.yml`.
+
+## Design
+
+The interface follows the companion Figma prototype: light gray application background, white cards, teal actions, validation states, disabled time slots, and a booking confirmation screen.
