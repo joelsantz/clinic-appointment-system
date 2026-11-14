@@ -29,7 +29,7 @@ The project intentionally uses plain HTML, CSS, and JavaScript. Business rules l
 
 ## Deployment
 
-Every push to `main` runs the test suite and deploys the repository to GitHub Pages using `.github/workflows/test-and-deploy.yml`.
+GitHub Pages publishes the static site directly from the root of the `main` branch. Run `npm test` before pushing changes.
 
 ## Design
 
